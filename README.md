@@ -49,6 +49,7 @@ Or with options:
             index: 'index.html',
             etag: true,
             gzip: true,
+            maxage: 0,
         }),
         error(),
     ]);
