@@ -69,6 +69,7 @@ Or with options:
     
         
     const app = new App();
+    
     app.then(error());
     
     router.get('/').then(async ctx => {
