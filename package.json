@@ -1,0 +1,71 @@
+{
+  "name": "yeps-static",
+  "version": "0.0.1",
+  "description": "YEPS static",
+  "main": "index.js",
+  "scripts": {
+    "lint": "./node_modules/.bin/npm-run-all --parallel lint:**",
+    "lint:js": "./node_modules/.bin/eslint index.js tests",
+    "test": "./node_modules/.bin/npm-run-all --parallel test:**",
+    "test:security": "./node_modules/.bin/nsp check",
+    "test:code": "node ./node_modules/mocha/bin/_mocha tests --recursive",
+    "test:coverage": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- tests --recursive",
+    "report": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "clear": "./node_modules/.bin/rimraf coverage",
+    "precommit": "npm run lint && npm test",
+    "prepush": "npm run lint && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evheniy/yeps-static.git"
+  },
+  "keywords": [
+    "promise",
+    "body",
+    "http",
+    "server",
+    "rest",
+    "fast",
+    "async",
+    "await",
+    "https",
+    "ssl",
+    "easy",
+    "static"
+  ],
+  "author": "Evheniy Bystrov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/evheniy/yeps-static/issues"
+  },
+  "homepage": "https://github.com/evheniy/yeps-static#readme",
+  "files": [
+    "index.js"
+  ],
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "coveralls": "^2.12.0",
+    "debug": "^2.6.3",
+    "eslint": "^3.18.0",
+    "eslint-config-eslint": "^3.0.0",
+    "husky": "^0.13.2",
+    "istanbul": "^1.1.0-alpha.1",
+    "mocha": "^3.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "npm-run-all": "^4.0.2",
+    "nsp": "^2.6.3",
+    "rimraf": "^2.6.1",
+    "sinon": "^1.17.7"
+  },
+  "dependencies": {
+    "mime-types": "^2.1.15",
+    "resolve-path": "^1.3.3",
+    "yeps": "^1.0.0",
+    "yeps-error": "^1.2.0",
+    "yeps-virtual-host": "^1.0.0"
+  }
+}
