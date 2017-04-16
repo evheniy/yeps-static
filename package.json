@@ -40,7 +40,8 @@
   },
   "homepage": "https://github.com/evheniy/yeps-static#readme",
   "files": [
-    "index.js"
+    "index.js",
+    "lib"
   ],
   "engines": {
     "node": ">=7.6.0"

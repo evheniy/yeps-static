@@ -1,132 +1,80 @@
-const debug = require('debug')('yeps:static');
-const mime = require('mime-types');
-const { createReadStream } = require('fs');
-const { stat } = require('mz/fs');
-const resolvePath = require('resolve-path');
+const debug = require('debug')('yeps:static:index');
+
+const methodCheck = require('./lib/methodCheck');
+const cacheCheck = require('./lib/cacheCheck');
+const getPath = require('./lib/getPath');
+const getStats = require('./lib/getStats');
+const getType = require('./lib/getType');
+
+const {createReadStream} = require('fs');
 const zlib = require('zlib');
-const {
-    extname,
-    parse,
-    normalize,
-    resolve
-} = require('path');
-
-const notfound = ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'];
-
 const getEncoding = (contentEncoding = '') => contentEncoding.includes('deflate') ? 'deflate' : 'gzip';
-
-const getType = path => mime.contentType(extname(path));
 
 module.exports = ({root = __dirname, index = 'index.html', etag = true, gzip = true, maxage = 0} = {}) => async context => {
 
     debug('YEPS Static');
     debug('Headers: %O', context.req.headers);
 
-    if (!['HEAD', 'GET'].includes(context.req.method.toUpperCase())) {
-        context.res.statusCode = 404;
-        debug('Wrong method: %s', context.req.method);
+    let path, stats, type;
 
-        context.res.end();
-        debug('End of response');
+    try {
+        await methodCheck(context);
+        await cacheCheck(etag, context);
+        path = await getPath(root, index, context.req.url);
+        type = getType(path);
+        stats = await getStats(index, path);
 
-        return Promise.reject();
-    }
+        const readStream = createReadStream(path);
 
-    if (etag && context.req.headers.etag) {
+        if (gzip) {
+            debug('gzip enabled!');
 
-        context.res.statusCode = 304;
-        debug('etag: %s', context.req.headers.etag);
+            const encoding = getEncoding(context.req.headers['accept-encoding']);
 
-        context.res.end();
-        debug('End of response');
+            debug('Encoding: %s', encoding);
 
-        return Promise.reject();
+            const zipStream = encoding === 'deflate' ? zlib.createDeflate() : zlib.createGzip();
 
-    } else {
-        try {
-            let path = context.req.url;
-            path = path.substr(parse(path).root.length);
+            context.res.setHeader('Content-Encoding', encoding);
 
-            path = decodeURIComponent(path);
-            debug('Path: %s', path);
+            debug('Content-Encoding: %s', encoding);
 
-            const trailingSlash = path[path.length - 1] === '/';
+            readStream.pipe(zipStream).pipe(context.res);
 
-            if (trailingSlash) {
-                path += index;
-                debug('Path: %s', path);
-            }
-
-            const directory = normalize(resolve(root));
-            debug('Directory: %s', directory);
-
-            path = resolvePath(directory, path);
-            debug('Path: %s', path);
-
-            let stats = await stat(path);
-            debug('Stats: %O', stats);
-
-            if (stats.isDirectory()) {
-                path = resolve(path, index);
-                debug('Path: %s', path);
-
-                stats = await stat(path);
-                debug('Stats: %O', stats);
-            }
-
-            context.res.setHeader('Last-Modified', stats.mtime.toUTCString());
-            debug('Last-Modified: %s', stats.mtime.toUTCString());
-
-            if (etag) {
-                context.res.setHeader('ETag', path);
-                debug('ETag: %s', path);
-            }
-
-            if (maxage) {
-                context.res.setHeader('Cache-Control', `max-age=${(maxage / 1000 | 0)}`);
-                debug('Cache-Control: %s', `max-age=${(maxage / 1000 | 0)}`);
-            }
-
-            const type = getType(path);
-            context.res.setHeader('Content-Type', type);
-            debug('Content-Type: %s', type);
-
-            context.res.statusCode = 200;
-
-            const readStream = createReadStream(path);
-
-            if (gzip) {
-                debug('gzip enabled!');
-
-                const encoding = getEncoding(context.req.headers['accept-encoding']);
-
-                debug('Encoding: %s', encoding);
-
-                const zipStream = encoding === 'deflate' ? zlib.createDeflate() : zlib.createGzip();
-
-                context.res.setHeader('Content-Encoding', encoding);
-
-                debug('Content-Encoding: %s', encoding);
-
-                readStream.pipe(zipStream).pipe(context.res);
-
-            } else {
-                readStream.pipe(context.res);
-            }
-
-            debug('End of response');
-            context.res.end();
-
-        } catch (error) {
-            debug('Error: %O', error);
-
-            if (!notfound.includes(error.code)) {
-                return Promise.reject(error);
-            }
-
-            return Promise.resolve();
+        } else {
+            readStream.pipe(context.res);
         }
+
+    } catch (error) {
+        debug('Error: %O', error);
+
+        if (error && !['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'].includes(error.code)) {
+            return Promise.reject(error);
+        }
+
+        return Promise.resolve();
     }
+
+    context.res.statusCode = 200;
+
+    if (etag) {
+        context.res.setHeader('ETag', context.req.url);
+        debug('ETag: %s', context.req.url);
+    }
+
+    context.res.setHeader('Last-Modified', stats.mtime.toUTCString());
+    debug('Last-Modified: %s', stats.mtime.toUTCString());
+
+    if (maxage) {
+        context.res.setHeader('Cache-Control', `max-age=${(maxage / 1000 | 0)}`);
+        debug('Cache-Control: %s', `max-age=${(maxage / 1000 | 0)}`);
+    }
+
+    context.res.setHeader('Content-Type', type);
+    debug('Content-Type: %s', type);
+
+    debug('End of response');
+    context.res.end();
 
     return Promise.reject();
 };
