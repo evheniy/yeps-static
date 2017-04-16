@@ -15,7 +15,7 @@ module.exports = ({root = __dirname, index = 'index.html', etag = true, gzip = t
     debug('Headers: %O', context.req.headers);
 
     try {
-        await methodCheck(context);
+        await methodCheck(context.req.method.toUpperCase());
         await cacheCheck(etag, context);
         let path = await getPath(root, index, context.req.url);
         const type = getType(path);
@@ -63,8 +63,6 @@ module.exports = ({root = __dirname, index = 'index.html', etag = true, gzip = t
 
         return Promise.resolve();
     }
-
-
 
     return Promise.reject();
 };
