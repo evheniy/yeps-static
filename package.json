@@ -13,7 +13,9 @@
     "report": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "clear": "./node_modules/.bin/rimraf coverage",
     "precommit": "npm run lint && npm test",
-    "prepush": "npm run lint && npm test"
+    "prepush": "npm run lint && npm test",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -63,7 +65,7 @@
     "sinon": "^1.17.7"
   },
   "dependencies": {
-    "coveralls": "^2.13.1",
+    "coveralls": "^3.0.0",
     "debug": "^2.6.6",
     "mime-types": "^2.1.15",
     "mocha": "^3.3.0",
@@ -72,6 +74,8 @@
     "yeps": "^1.0.0",
     "yeps-error": "^1.2.0",
     "yeps-method-override": "^1.0.1",
-    "yeps-virtual-host": "^1.0.0"
-  }
+    "yeps-virtual-host": "^1.0.0",
+    "snyk": "^1.41.1"
+  },
+  "snyk": true
 }
