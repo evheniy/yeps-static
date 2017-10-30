@@ -29,21 +29,30 @@ YEPS Static file serving
 ## How to use
 
     const App = require('yeps');
+    
     const serve = require('yeps-static');
+    
     const error = require('yeps-error');
+    const logger = require('yeps-logger');
+    const server = require('yeps-server');
     
     const app = new App();
     
     app.all([
-        serve(),
         error(),
+        logger(),
+        serve(),
     ]);
+    
+    server.createHttpServer(app);
 
-Or with options:
+Or with **options**:
 
     const { resolve } = require('path');
     
     app.all([
+        error(),
+        logger(),
         serve({
             root: resolve(__dirname, 'public'),
             index: 'index.html',
@@ -51,7 +60,6 @@ Or with options:
             gzip: true,
             maxage: 0,
         }),
-        error(),
     ]);
     
 #### With virtual host
@@ -59,20 +67,28 @@ Or with options:
     const App = require('yeps');
     const VirtualHost = require('yeps-virtual-host');
     const Router = require('yeps-router');
+    
     const error = require('yeps-error');
+    const logger = require('yeps-logger');
+    
+    const server = require('yeps-server');
     
     const { resolve } = require('path');
     
     const vhost = new VirtualHost();
     const router = new Router();
+    
     const serve = require('yeps-static');
     
         
     const app = new App();
     
-    app.then(error());
+    app.all([
+        error(),
+        logger(),
+    ]);
     
-    router.get('/').then(async ctx => {
+    router.get('/').then(async (ctx) => {
         ctx.res.statusCode = 200;
         ctx.res.setHeader('Content-Type', 'application/json');
         ctx.res.end('{"status":"OK"}'); 
@@ -85,9 +101,11 @@ Or with options:
     vhost
         .http('static.yeps.info')
         .then(serve({ 
-            root: resolve(__dirname, 'files')
+            root: resolve(__dirname, 'files'),
         }));
 
     app.then(vhost.resolve());
+    
+    server.createHttpServer(app);
     
 #### [YEPS documentation](http://yeps.info/)
