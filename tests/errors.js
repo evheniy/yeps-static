@@ -18,8 +18,8 @@ describe('YEPS static errors', async () => {
     server = srv.createHttpServer(app);
   });
 
-  afterEach(() => {
-    server.close();
+  afterEach((done) => {
+    server.close(done);
   });
 
   it('should test file readStream error', async () => {

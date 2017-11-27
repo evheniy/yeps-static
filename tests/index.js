@@ -20,8 +20,8 @@ describe('YEPS static', async () => {
     server = srv.createHttpServer(app);
   });
 
-  afterEach(() => {
-    server.close();
+  afterEach((done) => {
+    server.close(done);
   });
 
   it('should test etag', async () => {
@@ -333,5 +333,59 @@ describe('YEPS static', async () => {
     expect(isTestFinished1).is.true;
     expect(isTestFinished2).is.true;
     expect(isTestFinished3).is.true;
+  });
+
+  it('should test request parameters', async () => {
+    let isTestFinished = false;
+
+    app.then(serve({
+      root: __dirname,
+    }));
+
+    await chai.request(server)
+      .get('/files/index.html?t=1')
+      .send()
+      .then((res) => {
+        expect(res).to.have.status(200);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
+  it('should test request parameters for directory', async () => {
+    let isTestFinished = false;
+
+    app.then(serve({
+      root: __dirname,
+    }));
+
+    await chai.request(server)
+      .get('/files/?t=1')
+      .send()
+      .then((res) => {
+        expect(res).to.have.status(200);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
+  it('should test request parameters for directory without /', async () => {
+    let isTestFinished = false;
+
+    app.then(serve({
+      root: __dirname,
+    }));
+
+    await chai.request(server)
+      .get('/files?t=1')
+      .send()
+      .then((res) => {
+        expect(res).to.have.status(200);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
   });
 });
