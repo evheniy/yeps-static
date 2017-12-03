@@ -41,6 +41,40 @@ describe('YEPS static', async () => {
     expect(isTestFinished).is.true;
   });
 
+  it('should test etag with If-None-Match', async () => {
+    let isTestFinished = false;
+
+    app.then(serve());
+
+    await chai.request(server)
+      .get('/files/index.html')
+      .set('If-None-Match', '/index.html')
+      .send()
+      .catch((err) => {
+        expect(err).to.have.status(304);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
+  it('should test etag with If-Modified-Since', async () => {
+    let isTestFinished = false;
+
+    app.then(serve());
+
+    await chai.request(server)
+      .get('/files/index.html')
+      .set('If-Modified-Since', Date.now())
+      .send()
+      .catch((err) => {
+        expect(err).to.have.status(304);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
   it('should test index file', async () => {
     let isTestFinished = false;
 
