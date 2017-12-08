@@ -63,11 +63,13 @@ module.exports = ({
   } catch (error) {
     debug('Error: %O', error);
 
-    if (error && !['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'].includes(error.code)) {
-      return Promise.reject(error);
-    }
+    if (error) {
+      if (!['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'].includes(error.code)) {
+        return Promise.reject(error);
+      }
 
-    return Promise.resolve();
+      return Promise.resolve();
+    }
   }
 
   return Promise.reject();
