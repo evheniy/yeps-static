@@ -94,6 +94,44 @@ describe('YEPS static', async () => {
     expect(isTestFinished).is.true;
   });
 
+  it('should test disabled index file for /', async () => {
+    let isTestFinished = false;
+
+    app.then(serve({
+      root: __dirname,
+      index: false,
+    }));
+
+    await chai.request(server)
+      .get('/files/')
+      .send()
+      .catch((err) => {
+        expect(err).to.have.status(404);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
+  it('should test disabled index file', async () => {
+    let isTestFinished = false;
+
+    app.then(serve({
+      root: __dirname,
+      index: false,
+    }));
+
+    await chai.request(server)
+      .get('/files/index.html')
+      .send()
+      .catch((err) => {
+        expect(err).to.have.status(404);
+        isTestFinished = true;
+      });
+
+    expect(isTestFinished).is.true;
+  });
+
   it('should test without gzip', async () => {
     let isTestFinished = false;
 

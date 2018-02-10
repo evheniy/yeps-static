@@ -3,5 +3,6 @@ node_js:
   - "8"
   - "9"
 script:
+  - npm i debug mime-types mz resolve-path
   - npm run test
   - npm run report

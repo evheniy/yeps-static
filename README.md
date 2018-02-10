@@ -23,7 +23,7 @@ YEPS Static file serving
 
 ## How to install
 
-    npm i -S yeps-static
+    npm i -S yeps-static debug mime-types mz resolve-path
   
 
 ## How to use
@@ -55,12 +55,14 @@ Or with **options**:
         logger(),
         serve({
             root: resolve(__dirname, 'public'),
-            index: 'index.html',
+            index: 'index.html', // or false
             etag: true,
             gzip: true,
             maxage: 0,
         }),
     ]);
+    
+**index: false** will disable serving index file. It could be useful for SPA.
     
 #### With virtual host
 
