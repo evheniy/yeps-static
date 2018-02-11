@@ -1,6 +1,6 @@
 {
   "name": "yeps-static",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "YEPS static",
   "main": "index.js",
   "scripts": {
